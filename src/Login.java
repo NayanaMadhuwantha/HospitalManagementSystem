@@ -3,25 +3,29 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 import javax.swing.*;
-public class Login extends JFrame implements ActionListener{
+public class Login extends JFrame implements ActionListener,DbInfo{
     JPanel panel;
     JLabel lblUser, lblPassword;
     JTextField txtUser, txtPassword;
     JButton btnLogin, btnReset;
-
-
-
+    BufferedImage dpImage = null;
     Login(){
-        BufferedImage myPicture = null;
         try {
-            myPicture = ImageIO.read(new File("C:/Users/Nayana Madhuwantha/IdeaProjects/HospitalManagementSystem/src/dp.png"));
+            dpImage = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("images/dp.png")));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        JLabel picLabel = new JLabel(new ImageIcon(myPicture));
-        picLabel.setBounds(10,10,200,200);
+        dpImage = HospitalManager.resize(dpImage,150,150);
+        JLabel picLabel = new JLabel(new ImageIcon(dpImage));
+        picLabel.setBounds(120,30,150,150);
 
         // Username Label
         lblUser = new JLabel();
@@ -77,7 +81,41 @@ public class Login extends JFrame implements ActionListener{
                 JOptionPane.showMessageDialog(null,"Username or password missing");
             }
             else {
-                Home home = new Home();
+                String userName = txtUser.getText();
+                String passsword = txtPassword.getText();
+                boolean loggedin = false;
+                try{
+                    Class.forName(MysqlDriver);
+                    Connection con= DriverManager.getConnection(database, databaseUser,databsePassword);
+                    PreparedStatement pstmt = con.prepareStatement(queryGetLoginData);
+                    pstmt.setString(1, userName);
+                    pstmt.setString(2, passsword);
+                    ResultSet loginData = pstmt.executeQuery();
+
+
+                    while(loginData.next()) {
+                        System.out.println("User: "+loginData.getString(2));
+                        loggedin = true;
+                    }
+
+                    con.close();
+                    pstmt.close();
+                    loginData.close();
+                }
+                catch(Exception ex){
+                    System.out.println(ex);
+                }
+
+                if (loggedin){
+                    this.setVisible(false);
+                    Home home = new Home();
+                }
+                else {
+                    txtUser.setText("");
+                    txtPassword.setText("");
+                    JOptionPane.showMessageDialog(null,"Incorrect username or password");
+                }
+
             }
         }
         else if (e.getSource() == btnReset){

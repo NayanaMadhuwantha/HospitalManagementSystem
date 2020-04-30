@@ -2,8 +2,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
-public class PatientRegistation extends JFrame implements ActionListener{
+public class PatientRegistation extends JFrame implements ActionListener,DbInfo{
     JPanel panel;
     JLabel lblTitle,lblName,lblGender,lblAge,lblDate,lblContact,lblAddress;
     JTextField txtName,txtAge,txtDate,txtContact,txtAddress;
@@ -96,18 +100,52 @@ public class PatientRegistation extends JFrame implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnReset){
-            txtName.setText("");
-            txtAge.setText("");
-            txtDate.setText("");
-            txtContact.setText("");
-            txtAddress.setText("");
+            clear();
         }
         else if (e.getSource() == btnAdd){
             if (txtName.getText().equals("") || txtAge.getText().equals("") || txtDate.getText().equals("") || txtContact.getText().equals("") || txtAddress.getText().equals("")){
                 JOptionPane.showMessageDialog(null,"Please fill all fields");
             }
             else {
-                System.out.println("reg");
+                String gender;
+                String patiendID = "";
+                if (rdoMale.isSelected()){
+                    gender = "Male";
+                }
+                else {
+                    gender = "Female";
+                }
+                try{
+                    Class.forName(MysqlDriver);
+                    Connection con= DriverManager.getConnection(database, databaseUser,databsePassword);
+                    PreparedStatement pstmt = con.prepareStatement(querryInsertPatient);
+                    pstmt.setString(1, txtName.getText()); //name,gender,age,date,contact,address
+                    pstmt.setString(2, gender);
+                    pstmt.setString(3, txtAge.getText());
+                    pstmt.setString(4, txtDate.getText());
+                    pstmt.setString(5, txtContact.getText());
+                    pstmt.setString(6, txtAddress.getText());
+                    int count = pstmt.executeUpdate();
+
+                    if (count > 0){
+                        pstmt = con.prepareStatement("SELECT ID FROM patient ORDER BY ID DESC LIMIT 1");
+                        ResultSet data = pstmt.executeQuery();
+                        while (data.next()){
+                            patiendID = data.getString(1);
+                        }
+                        JOptionPane.showMessageDialog(null,txtName.getText()+"'s Employee Number is "+patiendID);
+
+                        clear();
+                    }
+
+                    con.close();
+                    pstmt.close();
+                }
+                catch(Exception ex){
+                    JOptionPane.showMessageDialog(null,"Something went wrong");
+                    clear();
+                    System.out.println(ex);
+                }
             }
         }
         else if (e.getSource() == rdoMale){
@@ -118,5 +156,12 @@ public class PatientRegistation extends JFrame implements ActionListener{
             rdoMale.setSelected(false);
             rdoFemale.setSelected(true);
         }
+    }
+    public void clear(){
+        txtName.setText("");
+        txtAge.setText("");
+        txtDate.setText("");
+        txtContact.setText("");
+        txtAddress.setText("");
     }
 }

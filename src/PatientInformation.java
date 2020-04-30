@@ -2,8 +2,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
-public class PatientInformation extends JFrame implements ActionListener{
+public class PatientInformation extends JFrame implements ActionListener,DbInfo{
     JPanel panel;
     JLabel lblId,lblTitle,lblName,lblGender,lblAge,lblDate,lblContact,lblAddress;
     JTextField txtId,txtName,txtAge,txtDate,txtContact,txtAddress;
@@ -120,10 +124,55 @@ public class PatientInformation extends JFrame implements ActionListener{
         }
         else {
             if (e.getSource() == btnSearch){
-                System.out.println("search");
+                try{
+                    Class.forName(MysqlDriver);
+                    Connection con=DriverManager.getConnection(database, databaseUser,databsePassword);
+                    PreparedStatement pstmt = con.prepareStatement(querryGetPatientData);
+                    pstmt.setString(1, txtId.getText());
+                    ResultSet patientData = pstmt.executeQuery();
+
+                    if (!patientData.isBeforeFirst()){
+                        txtName.setText("");
+                        txtAge.setText("");
+                        txtDate.setText("");
+                        txtContact.setText("");
+                        txtAddress.setText("");
+                        JOptionPane.showMessageDialog(null,"No matching data");
+                    }
+                    else {
+                        while(patientData.next()) {
+                            txtName.setText(patientData.getString(2));
+                            if (patientData.getString(3).equals("Male")){
+                                rdoMale.setSelected(true);
+                                rdoFemale.setSelected(false);
+                            }
+                            else {
+                                rdoMale.setSelected(false);
+                                rdoFemale.setSelected(true);
+                            }
+                            txtAge.setText(patientData.getString(4));
+                            txtDate.setText(patientData.getString(5));
+                            txtContact.setText(patientData.getString(6));
+                            txtAddress.setText(patientData.getString(7));
+                        }
+                    }
+
+                    con.close();
+                    pstmt.close();
+                    patientData.close();
+                }
+                catch(Exception ee){
+                    JOptionPane.showMessageDialog(null,"Something went wrong");
+                    System.out.println(ee);
+                }
             }
             else if (e.getSource() == btnUpdate){
-                System.out.println("update");
+                if (txtName.getText().equals("") || txtAge.getText().equals("") || txtDate.getText().equals("") || txtContact.getText().equals("") || txtAddress.getText().equals("")){
+                    JOptionPane.showMessageDialog(null,"Please fill all fields");
+                }
+                else {
+                    System.out.println("update");
+                }
             }
             else if(e.getSource() == btnDelete){
                 System.out.println("delete");
