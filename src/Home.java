@@ -27,7 +27,7 @@ public class Home extends JFrame implements ActionListener{
         panel.add(btnPatientInfo);
         panel.add(btnStafinfo);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         add(panel,  BorderLayout.CENTER);
         setTitle("Home");
         setSize(450,350);
@@ -41,13 +41,13 @@ public class Home extends JFrame implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnPatientReg){
-            System.out.println("patient reg");
+            PatientRegistation patientRegistation = new PatientRegistation();
         }
         else if (e.getSource() == btnPatientInfo){
-            System.out.println("patient info");
+            PatientInformation patientInformation = new PatientInformation();
         }
         else if (e.getSource() == btnStafinfo){
-            System.out.println("staff info");
+            StaffInformation staffInformation = new StaffInformation();
         }
     }
 }

@@ -9,5 +9,9 @@ public class HospitalManager {
         }
 
         Login login = new Login();
+        //Home home = new Home();
+        //PatientRegistation patientRegistation = new PatientRegistation();
+        //PatientInformation patientInformation = new PatientInformation();
+        //StaffInformation staffInformation = new StaffInformation();
     }
 }
