@@ -1,2 +1,2 @@
 # HospitalManagementSystem
-sineth lakshan
+Sineth Lakshan
