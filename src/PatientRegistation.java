@@ -107,6 +107,7 @@ public class PatientRegistation extends JFrame implements ActionListener,DbInfo{
                 JOptionPane.showMessageDialog(null,"Please fill all fields");
             }
             else {
+                //enter patient data
                 String gender;
                 String patiendID = "";
                 if (rdoMale.isSelected()){
@@ -128,12 +129,12 @@ public class PatientRegistation extends JFrame implements ActionListener,DbInfo{
                     int count = pstmt.executeUpdate();
 
                     if (count > 0){
-                        pstmt = con.prepareStatement("SELECT ID FROM patient ORDER BY ID DESC LIMIT 1");
+                        pstmt = con.prepareStatement(getLatustPatient);
                         ResultSet data = pstmt.executeQuery();
                         while (data.next()){
                             patiendID = data.getString(1);
                         }
-                        JOptionPane.showMessageDialog(null,txtName.getText()+"'s Employee Number is "+patiendID);
+                        JOptionPane.showMessageDialog(null,txtName.getText()+"'s patient ID is "+patiendID);
 
                         clear();
                     }

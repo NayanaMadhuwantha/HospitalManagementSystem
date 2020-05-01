@@ -2,8 +2,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
-public class StaffInformation extends JFrame implements ActionListener {
+public class StaffInformation extends JFrame implements ActionListener,DbInfo {
     JPanel panel;
     JLabel lblId,lblTitle,lblName,lblGender, lblPosition,lblSalary,lblContact,lblAddress;
     JTextField txtId,txtName, txtPosition, txtSalary, txtContact, txtAddress;
@@ -14,7 +18,7 @@ public class StaffInformation extends JFrame implements ActionListener {
         lblTitle.setBounds(70,10,200,20);
         lblTitle.setFont(new Font("Arial", Font.PLAIN, 20));
 
-        lblId = new JLabel("Patient ID :");
+        lblId = new JLabel("Staff ID :");
         lblId.setBounds(10,50,60,20);
         txtId = new JTextField();
         txtId.setBounds(100,50,200,20);
@@ -121,26 +125,148 @@ public class StaffInformation extends JFrame implements ActionListener {
             rdoFemale.setSelected(true);
         }
         else if(e.getSource() == btnReset){
-            txtName.setText("");
-            txtPosition.setText("");
-            txtSalary.setText("");
-            txtId.setText("");
-            txtContact.setText("");
-            txtAddress.setText("");
-        }
-        else if (txtId.getText().equals("")){
-            JOptionPane.showMessageDialog(null,"Please Enter Staff ID");
+            clear();
         }
         else {
             if (e.getSource() == btnAdd){
-                System.out.println("Add");
+                //add staff
+                if (txtName.getText().equals("") || txtPosition.getText().equals("") || txtSalary.getText().equals("") || txtContact.getText().equals("") || txtAddress.getText().equals("")){
+                    JOptionPane.showMessageDialog(null,"Please fill all fields");
+                }
+                else {
+                    //enter patient data
+                    String gender;
+                    String StaffID = "";
+                    if (rdoMale.isSelected()){
+                        gender = "Male";
+                    }
+                    else {
+                        gender = "Female";
+                    }
+                    try{
+                        Class.forName(MysqlDriver);
+                        Connection con= DriverManager.getConnection(database, databaseUser,databsePassword);
+                        PreparedStatement pstmt = con.prepareStatement(querryInsertStaff);
+                        pstmt.setString(1, txtName.getText()); //name,gender,position,salary,contact,address
+                        pstmt.setString(2, gender);
+                        pstmt.setString(3, txtPosition.getText());
+                        pstmt.setString(4, txtSalary.getText());
+                        pstmt.setString(5, txtContact.getText());
+                        pstmt.setString(6, txtAddress.getText());
+                        int count = pstmt.executeUpdate();
+
+                        if (count > 0){
+                            pstmt = con.prepareStatement(getLatustStaff);
+                            ResultSet data = pstmt.executeQuery();
+                            while (data.next()){
+                                StaffID = data.getString(1);
+                            }
+                            JOptionPane.showMessageDialog(null,txtName.getText()+"'s staff ID is "+StaffID);
+
+                            clear();
+                        }
+
+                        con.close();
+                        pstmt.close();
+                    }
+                    catch(Exception ex){
+                        JOptionPane.showMessageDialog(null,"Something went wrong");
+                        clear();
+                        System.out.println(ex);
+                    }
+                }
+            }
+            else if (txtId.getText().equals("")){
+                JOptionPane.showMessageDialog(null,"Please Enter Staff ID");
+                clear();
             }
             else if (e.getSource() == btnSearch){
-                System.out.println("Search");
+                //search staff
+                try{
+                    Class.forName(MysqlDriver);
+                    Connection con=DriverManager.getConnection(database, databaseUser,databsePassword);
+                    PreparedStatement pstmt = con.prepareStatement(querryGetStaff);
+                    pstmt.setString(1, txtId.getText());
+                    ResultSet staffData = pstmt.executeQuery();
+
+                    if (!staffData.isBeforeFirst()){
+                        clear();
+                        JOptionPane.showMessageDialog(null,"No matching data");
+                    }
+                    else {
+                        while(staffData.next()) {
+                            txtName.setText(staffData.getString(2));
+                            if (staffData.getString(3).equals("Male")){
+                                rdoMale.setSelected(true);
+                                rdoFemale.setSelected(false);
+                            }
+                            else {
+                                rdoMale.setSelected(false);
+                                rdoFemale.setSelected(true);
+                            }
+                            txtPosition.setText(staffData.getString(4));
+                            txtSalary.setText(staffData.getString(5));
+                            txtContact.setText(staffData.getString(6));
+                            txtAddress.setText(staffData.getString(7));
+                        }
+                    }
+
+                    con.close();
+                    pstmt.close();
+                    staffData.close();
+                }
+                catch(Exception ee){
+                    JOptionPane.showMessageDialog(null,"Something went wrong");
+                    System.out.println(ee);
+                }
             }
             else if(e.getSource() == btnUpdate){
-                System.out.println("Update");
+                //update staff
+                String gender;
+                if (rdoMale.isSelected()){
+                    gender = "Male";
+                }
+                else {
+                    gender = "Female";
+                }
+                try{
+                    Class.forName(MysqlDriver);
+                    Connection con= DriverManager.getConnection(database, databaseUser,databsePassword);
+                    PreparedStatement pstmt = con.prepareStatement(queryUpdateStaff);
+                    pstmt.setString(1, txtName.getText()); //name,gender,position,salary,contact,address
+                    pstmt.setString(2, gender);
+                    pstmt.setString(3, txtPosition.getText());
+                    pstmt.setString(4, txtSalary.getText());
+                    pstmt.setString(5, txtContact.getText());
+                    pstmt.setString(6, txtAddress.getText());
+                    pstmt.setString(7, txtId.getText());
+                    int count = pstmt.executeUpdate();
+
+                    if (count > 0){
+                        JOptionPane.showMessageDialog(null,"Updated Successfully");
+                        clear();
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(null,"No matching data");
+                    }
+
+                    con.close();
+                    pstmt.close();
+                }
+                catch(Exception ex){
+                    JOptionPane.showMessageDialog(null,"Something went wrong");
+                    clear();
+                    System.out.println(ex);
+                }
             }
         }
+    }
+    public void clear(){
+        txtName.setText("");
+        txtPosition.setText("");
+        txtSalary.setText("");
+        txtId.setText("");
+        txtContact.setText("");
+        txtAddress.setText("");
     }
 }

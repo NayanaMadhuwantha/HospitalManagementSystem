@@ -121,22 +121,20 @@ public class PatientInformation extends JFrame implements ActionListener,DbInfo{
         }
         else if (txtId.getText().equals("")){
             JOptionPane.showMessageDialog(null,"Please Enter Patient ID");
+            clear();
         }
         else {
             if (e.getSource() == btnSearch){
+                //search patient
                 try{
                     Class.forName(MysqlDriver);
                     Connection con=DriverManager.getConnection(database, databaseUser,databsePassword);
-                    PreparedStatement pstmt = con.prepareStatement(querryGetPatientData);
+                    PreparedStatement pstmt = con.prepareStatement(querryGetPatient);
                     pstmt.setString(1, txtId.getText());
                     ResultSet patientData = pstmt.executeQuery();
 
                     if (!patientData.isBeforeFirst()){
-                        txtName.setText("");
-                        txtAge.setText("");
-                        txtDate.setText("");
-                        txtContact.setText("");
-                        txtAddress.setText("");
+                        clear();
                         JOptionPane.showMessageDialog(null,"No matching data");
                     }
                     else {
@@ -171,12 +169,78 @@ public class PatientInformation extends JFrame implements ActionListener,DbInfo{
                     JOptionPane.showMessageDialog(null,"Please fill all fields");
                 }
                 else {
-                    System.out.println("update");
+                    //update patient
+                    String gender;
+                    if (rdoMale.isSelected()){
+                        gender = "Male";
+                    }
+                    else {
+                        gender = "Female";
+                    }
+                    try{
+                        Class.forName(MysqlDriver);
+                        Connection con= DriverManager.getConnection(database, databaseUser,databsePassword);
+                        PreparedStatement pstmt = con.prepareStatement(queryUpdatePatient);
+                        pstmt.setString(1, txtName.getText()); //name,gender,age,date,contact,address
+                        pstmt.setString(2, gender);
+                        pstmt.setString(3, txtAge.getText());
+                        pstmt.setString(4, txtDate.getText());
+                        pstmt.setString(5, txtContact.getText());
+                        pstmt.setString(6, txtAddress.getText());
+                        pstmt.setString(7, txtId.getText());
+                        int count = pstmt.executeUpdate();
+
+                        if (count > 0){
+                            JOptionPane.showMessageDialog(null,"Updated Successfully");
+                            clear();
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null,"No matching data");
+                        }
+
+                        con.close();
+                        pstmt.close();
+                    }
+                    catch(Exception ex){
+                        JOptionPane.showMessageDialog(null,"Something went wrong");
+                        clear();
+                        System.out.println(ex);
+                    }
                 }
             }
             else if(e.getSource() == btnDelete){
-                System.out.println("delete");
+                //delete patient
+                try{
+                    Class.forName(MysqlDriver);
+                    Connection con= DriverManager.getConnection(database, databaseUser,databsePassword);
+                    PreparedStatement pstmt = con.prepareStatement(queryDeletePatient);
+                    pstmt.setString(1,txtId.getText());
+                    int count = pstmt.executeUpdate();
+
+                    if (count > 0){
+                        JOptionPane.showMessageDialog(null,"Delete Successfully");
+                        clear();
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(null,"No matching data");
+                    }
+
+                    con.close();
+                    pstmt.close();
+                }
+                catch(Exception ex){
+                    JOptionPane.showMessageDialog(null,"Something went wrong");
+                    clear();
+                    System.out.println(ex);
+                }
             }
         }
+    }
+    public void clear(){
+        txtName.setText("");
+        txtAge.setText("");
+        txtDate.setText("");
+        txtContact.setText("");
+        txtAddress.setText("");
     }
 }

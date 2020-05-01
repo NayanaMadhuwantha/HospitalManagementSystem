@@ -1,9 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -81,6 +79,7 @@ public class Login extends JFrame implements ActionListener,DbInfo{
                 JOptionPane.showMessageDialog(null,"Username or password missing");
             }
             else {
+                //check username and password
                 String userName = txtUser.getText();
                 String passsword = txtPassword.getText();
                 boolean loggedin = false;
