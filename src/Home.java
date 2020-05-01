@@ -70,13 +70,16 @@ public class Home extends JFrame implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnPatientReg){
-            PatientRegistation patientRegistation = new PatientRegistation();
+            PatientRegistation patientRegistation = new PatientRegistation(this);
+            this.setEnabled(false);
         }
         else if (e.getSource() == btnPatientInfo){
-            PatientInformation patientInformation = new PatientInformation();
+            PatientInformation patientInformation = new PatientInformation(this);
+            this.setEnabled(false);
         }
         else if (e.getSource() == btnStafinfo){
-            StaffInformation staffInformation = new StaffInformation();
+            StaffInformation staffInformation = new StaffInformation(this);
+            this.setEnabled(false);
         }
     }
 }

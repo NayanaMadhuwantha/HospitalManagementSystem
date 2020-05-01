@@ -13,7 +13,7 @@ public class PatientInformation extends JFrame implements ActionListener,DbInfo{
     JTextField txtId,txtName,txtAge,txtDate,txtContact,txtAddress;
     JButton btnSearch,btnUpdate,btnDelete;
     JRadioButton rdoMale,rdoFemale;
-    PatientInformation(){
+    PatientInformation(Home home){
         lblTitle = new JLabel("Patient Information");
         lblTitle.setBounds(70,10,200,20);
         lblTitle.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -107,6 +107,12 @@ public class PatientInformation extends JFrame implements ActionListener,DbInfo{
         setResizable(false);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                home.setEnabled(true);
+            }
+        });
     }
 
     @Override
